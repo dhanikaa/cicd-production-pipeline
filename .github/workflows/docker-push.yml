@@ -25,7 +25,7 @@ jobs:
       with:
         context: .
         push: true
-        tags: dhanikaa/brainwave:latest
+        tags: dhanikaa/cicd-pipeline:latest
   ec2-push:
     needs: dockerhub-push
     name: deploy using ec2
@@ -35,11 +35,11 @@ jobs:
       - name: SSH setup
         run: |
           mkdir -p ~/.ssh/
-          echo "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/brainwave.pem
-          chmod 600 ~/.ssh/brainwave.pem
+          echo "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/cicd-pipeline.pem
+          chmod 600 ~/.ssh/cicd-pipeline.pem
       - name: Installing and starting docker
         run: |
-          ssh -o StrictHostKeyChecking=no -i ~/.ssh/brainwave.pem ec2-user@ec2-13-60-248-34.eu-north-1.compute.amazonaws.com "
+          ssh -o StrictHostKeyChecking=no -i ~/.ssh/cicd-pipeline.pem ec2-user@ec2-16-171-8-81.eu-north-1.compute.amazonaws.com "
           sudo yum update -y &&
           sudo yum install -y docker &&
           sudo systemctl start docker &&
@@ -47,15 +47,15 @@ jobs:
           " || exit 1
       - name: Login to EC2 from dockerhub
         run: |
-          ssh -o StrictHostKeyChecking=no -i ~/.ssh/brainwave.pem ec2-user@ec2-13-60-248-34.eu-north-1.compute.amazonaws.com "
+          ssh -o StrictHostKeyChecking=no -i ~/.ssh/cicd-pipeline.pem ec2-user@ec2-16-171-8-81.eu-north-1.compute.amazonaws.com "
           sudo docker login -u ${{secrets.DOCKER_USERNAME}} -p ${{secrets.DOCKER_PASSWORD}}
           " || exit 1
       - name: Run docker image on EC2
         run: |
-          ssh -o StrictHostKeyChecking=no -i ~/.ssh/brainwave.pem ec2-user@ec2-13-60-248-34.eu-north-1.compute.amazonaws.com "
-          sudo docker stop brainwave-app || true &&
-          sudo docker rm brainwave-app || true &&
-          sudo docker rmi dhanikaa/brainwave:latest || true &&
-          sudo docker pull dhanikaa/brainwave:latest &&
-          sudo docker run --name brainwave-app -d -p 3000:3000 dhanikaa/brainwave:latest
+          ssh -o StrictHostKeyChecking=no -i ~/.ssh/cicd-pipeline.pem ec2-user@ec2-16-171-8-81.eu-north-1.compute.amazonaws.com "
+          sudo docker stop cicd-pipeline-app || true &&
+          sudo docker rm cicd-pipeline-app || true &&
+          sudo docker rmi dhanikaa/cicd-pipeline:latest || true &&
+          sudo docker pull dhanikaa/cicd-pipeline:latest &&
+          sudo docker run --name cicd-pipeline -d -p 3000:3000 dhanikaa/cicd-pipeline:latest
           " || exit 1
