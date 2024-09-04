@@ -35,11 +35,11 @@ jobs:
       - name: SSH setup
         run: |
           mkdir -p ~/.ssh/
-          echo "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/cicd-pipeline.pem
-          chmod 600 ~/.ssh/cicd-pipeline.pem
+          echo "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/cicdpipeline.pem
+          chmod 600 ~/.ssh/cicdpipeline.pem
       - name: Installing and starting docker
         run: |
-          ssh -o StrictHostKeyChecking=no -i ~/.ssh/cicd-pipeline.pem ec2-user@ec2-16-171-8-81.eu-north-1.compute.amazonaws.com "
+          ssh -o StrictHostKeyChecking=no -i ~/.ssh/cicdpipeline.pem ec2-user@ec2-16-171-8-81.eu-north-1.compute.amazonaws.com "
           sudo yum update -y &&
           sudo yum install -y docker &&
           sudo systemctl start docker &&
@@ -47,12 +47,12 @@ jobs:
           " || exit 1
       - name: Login to EC2 from dockerhub
         run: |
-          ssh -o StrictHostKeyChecking=no -i ~/.ssh/cicd-pipeline.pem ec2-user@ec2-16-171-8-81.eu-north-1.compute.amazonaws.com "
+          ssh -o StrictHostKeyChecking=no -i ~/.ssh/cicdpipeline.pem ec2-user@ec2-16-171-8-81.eu-north-1.compute.amazonaws.com "
           sudo docker login -u ${{secrets.DOCKER_USERNAME}} -p ${{secrets.DOCKER_PASSWORD}}
           " || exit 1
       - name: Run docker image on EC2
         run: |
-          ssh -o StrictHostKeyChecking=no -i ~/.ssh/cicd-pipeline.pem ec2-user@ec2-16-171-8-81.eu-north-1.compute.amazonaws.com "
+          ssh -o StrictHostKeyChecking=no -i ~/.ssh/cicdpipeline.pem ec2-user@ec2-16-171-8-81.eu-north-1.compute.amazonaws.com "
           sudo docker stop cicd-pipeline-app || true &&
           sudo docker rm cicd-pipeline-app || true &&
           sudo docker rmi dhanikaa/cicd-pipeline:latest || true &&
